@@ -7,7 +7,7 @@ const rootDir = path.resolve(__dirname, '..')
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, rootDir, '')
-  const backendTarget = env.VITE_BACKEND_TARGET || 'http://127.0.0.1:8003'
+  const backendTarget = env.VITE_BACKEND_TARGET || 'http://127.0.0.1:8001'
 
   return {
     envDir: rootDir,

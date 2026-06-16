@@ -4,6 +4,15 @@ class ELDService:
 
     @staticmethod
     def generate_logs(total_driving_hours, current_cycle_used):
+        if total_driving_hours <= 0:
+            return {
+                "status": "no_route",
+                "message": (
+                    "This trip has no driving time — the stops are too close together or identical. "
+                    "Pin current, pickup, and dropoff at three different locations on the map."
+                ),
+            }
+
         remaining_cycle = (
             ELDService.MAX_CYCLE_HOURS - current_cycle_used
         )

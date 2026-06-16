@@ -27,6 +27,9 @@ class FuelMapper:
     def map_stops(route_points, fuel_stops, total_distance):
         mapped = []
 
+        if not route_points or total_distance <= 0:
+            return mapped
+
         interval = FuelService.FUEL_INTERVAL
         stop_distance = interval
 

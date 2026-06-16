@@ -63,26 +63,33 @@ class TripPlanAPIView(APIView):
         total_distance = route1["distance"] + route2["distance"]
         total_duration = route1["duration"] + route2["duration"]
 
+        try:
+            route_points = polyline.decode(route1["geometry"]) + polyline.decode(route2["geometry"])
 
-        route_points = polyline.decode(route1["geometry"]) + polyline.decode(route2["geometry"])
+            fuel_stops = FuelService.calculate_fuel_stops(total_distance)
 
+            fuel_mapped = FuelMapper.map_stops(route_points, fuel_stops, total_distance)
 
-        fuel_stops = FuelService.calculate_fuel_stops(total_distance)
+            total_driving_hours = total_duration / 3600
 
+            eld_result = ELDService.generate_logs(
+                total_driving_hours,
+                data["current_cycle_used"]
+            )
+        except Exception:
+            return Response(
+                {
+                    "status": "no_route",
+                    "message": (
+                        "Could not build the trip plan from this route. "
+                        "Make sure all three stops are pinned at different locations on the map."
+                    ),
+                },
+                status=400,
+            )
 
-        fuel_mapped = FuelMapper.map_stops(route_points, fuel_stops, total_distance)
-
-        total_driving_hours = total_duration / 3600
-
-        eld_result = ELDService.generate_logs(
-            total_driving_hours,
-            data["current_cycle_used"]
-        )
-
-        if eld_result["status"] == "cycle_exceeded":
+        if eld_result["status"] in ("cycle_exceeded", "no_route"):
             return Response(eld_result, status=400)
-        
-
 
         return Response({
             "distance_meters": total_distance,
